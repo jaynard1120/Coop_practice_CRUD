@@ -1,16 +1,76 @@
 <template>
+  <!-- Test simple table -->
   <b-card-code
-    title="Loan Requests History"
+    title="Request Loan History"
     no-body
   >
-    <b-table
+    <b-table-simple
+      hover
+      caption-top
       responsive
-      :items="items"
-      :fields="fields"
-      class="mb-0"
+      class="rounded-bottom mb-0"
     >
-      Test
-    </b-table>
+      <b-thead head-variant="light">
+        <b-tr>
+          <b-th colspan="1">
+            Request Date
+          </b-th>
+          <b-th colspan="2">
+            Amount
+          </b-th>
+          <b-th colspan="2">
+            Purpose
+          </b-th>
+          <b-th colspan="2">
+            Actions
+          </b-th>
+        </b-tr>
+      </b-thead>
+      <b-tbody>
+        <b-tr
+          v-for="data in items"
+          :key="data.id"
+        >
+          <b-td colspan="1">
+            {{ data.created_at }}
+          </b-td>
+          <b-td colspan="2">
+            {{ data.amount }}
+          </b-td>
+          <b-td colspan="2">
+            {{ data.purpose }}
+          </b-td>
+          <b-td colspan="2">
+            <b-button
+              id="delete"
+              v-ripple.400="'rgba(113, 102, 240, 0.15)'"
+              variant="outline-danger"
+            >
+              Delete
+            </b-button>
+            <span> | </span>
+            <b-button
+              id="edit"
+              v-ripple.400="'rgba(113, 102, 240, 0.15)'"
+              variant="outline-primary"
+            >
+              Edit
+            </b-button>
+          </b-td>
+        </b-tr>
+      </b-tbody>
+      <b-tfoot>
+        <b-tr>
+          <b-td
+            colspan="7"
+            variant="secondary"
+            class="text-right"
+          >
+            Total Rows: <b>{{ items.length }}</b>
+          </b-td>
+        </b-tr>
+      </b-tfoot>
+    </b-table-simple>
     <!-- Modal Form -->
     <b-card-code>
       <!-- modal trigger button -->
@@ -93,12 +153,12 @@
       </b-modal>
     </b-card-code>
   </b-card-code>
+
 </template>
 
 <script>
 import BCardCode from '@core/components/b-card-code/BCardCode.vue'
 import {
-  BTable,
   BButton,
   BModal,
   BRow,
@@ -106,6 +166,13 @@ import {
   BFormGroup,
   BFormInput,
   BForm,
+  BTableSimple,
+  BThead,
+  BTr,
+  BTh,
+  BTd,
+  BTbody,
+  BTfoot,
 } from 'bootstrap-vue'
 import Ripple from 'vue-ripple-directive'
 import axios from 'axios'
@@ -114,7 +181,6 @@ import ToastificationContent from '@core/components/toastification/Toastificatio
 export default {
   components: {
     BCardCode,
-    BTable,
     BButton,
     BModal,
     BRow,
@@ -122,6 +188,13 @@ export default {
     BFormGroup,
     BFormInput,
     BForm,
+    BTableSimple,
+    BThead,
+    BTr,
+    BTh,
+    BTd,
+    BTbody,
+    BTfoot,
   },
   directives: {
     Ripple,
@@ -137,6 +210,7 @@ export default {
         'created_at',
         'amount',
         'purpose',
+        'actions',
       ],
       items: [
 
