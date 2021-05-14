@@ -109,6 +109,7 @@
                     <b-form-input
                       id="v-purpose"
                       v-model="loan.purpose"
+                      autocomplete="off"
                       type="text"
                       placeholder="Purpose of your loan"
                     />
@@ -240,6 +241,16 @@ export default {
       })
   },
   methods: {
+    toastErrorMessage(message) {
+      this.$toast({
+        component: ToastificationContent,
+        props: {
+          title: message,
+          icon: 'EditIcon',
+          variant: 'danger',
+        },
+      })
+    },
     showModal() {
       this.$refs['my-modal'].show()
     },
@@ -262,24 +273,10 @@ export default {
           this.loan.purpose = ''
           this.loan.amount = 0
         }).catch(() => {
-          this.$toast({
-            component: ToastificationContent,
-            props: {
-              title: 'There was an error in submitting your data!',
-              icon: 'EditIcon',
-              variant: 'danger',
-            },
-          })
+          this.toastErrorMessage('There was an error in submitting your data!')
         })
       } else {
-        this.$toast({
-          component: ToastificationContent,
-          props: {
-            title: 'Make sure to fill in all the fields!',
-            icon: 'EditIcon',
-            variant: 'danger',
-          },
-        })
+        this.toastErrorMessage('Make sure to fill in all the fields and should be greater than zero!')
       }
     },
     deleteLoan(id) {
@@ -297,15 +294,27 @@ export default {
       this.showModal()
     },
     updateRequest() {
-      this.$http.put(`/loan/${this.selectedId}`, {
-        amount: this.loan.amount,
-        purpose: this.loan.purpose,
-      }).then(() => {
-        const loanIndex = this.items.findIndex(loan => loan.id === this.selectedId)
-        this.items[loanIndex].purpose = this.loan.purpose
-        this.items[loanIndex].amount = this.loan.amount
-        this.toggleModal()
-      })
+      if (this.loan.purpose && this.loan.amount > 0) {
+        this.$http.put(`/loan/${this.selectedId}`, {
+          amount: this.loan.amount,
+          purpose: this.loan.purpose,
+        }).then(() => {
+          const loanIndex = this.items.findIndex(loan => loan.id === this.selectedId)
+          this.items[loanIndex].purpose = this.loan.purpose
+          this.items[loanIndex].amount = this.loan.amount
+          this.toggleModal()
+          this.$toast({
+            component: ToastificationContent,
+            props: {
+              title: 'Successfull!',
+              icon: 'EditIcon',
+              variant: 'success',
+            },
+          })
+        })
+      } else {
+        this.toastErrorMessage('Make sure to fill in all the fields and should be greater than zero!')
+      }
     },
     newLoan() {
       this.update = false
