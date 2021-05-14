@@ -13,5 +13,12 @@ class LoanController extends Controller
         $user->loans()->create($request->all());
         return $user->loans;
     }
-
+    public function deleteLoan($id)
+    {
+        LoanModel::findOrFail($id)->delete();
+    }
+    public function updateLoan(Request $request, $id)
+    {
+        LoanModel::findOrFail($id)->update($request->all());
+    }
 }

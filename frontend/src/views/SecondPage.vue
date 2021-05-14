@@ -45,6 +45,7 @@
               id="delete"
               v-ripple.400="'rgba(113, 102, 240, 0.15)'"
               variant="outline-danger"
+              @click="deleteLoan(data.id)"
             >
               Delete
             </b-button>
@@ -53,6 +54,7 @@
               id="edit"
               v-ripple.400="'rgba(113, 102, 240, 0.15)'"
               variant="outline-primary"
+              @click="editLoan(data.id)"
             >
               Edit
             </b-button>
@@ -79,7 +81,7 @@
           id="show-btn"
           v-ripple.400="'rgba(113, 102, 240, 0.15)'"
           variant="outline-primary"
-          @click="showModal"
+          @click="newLoan"
         >
           Request new loan
         </b-button>
@@ -133,6 +135,7 @@
           </b-card-code>
         </div>
         <b-button
+          v-if="!update"
           v-ripple.400="'rgba(113, 102, 240, 0.15)'"
           class="mt-3"
           variant="outline-primary"
@@ -140,6 +143,16 @@
           @click="saveRequest"
         >
           Submit Request
+        </b-button>
+        <b-button
+          v-if="update"
+          v-ripple.400="'rgba(113, 102, 240, 0.15)'"
+          class="mt-3"
+          variant="outline-primary"
+          block
+          @click="updateRequest"
+        >
+          Update Request
         </b-button>
         <b-button
           v-ripple.400="'rgba(234, 84, 85, 0.15)'"
@@ -201,6 +214,8 @@ export default {
   },
   data() {
     return {
+      selectedId: 0,
+      update: false,
       loan: {
         email: 'jaynard@gmail.com',
         purpose: '',
@@ -266,6 +281,37 @@ export default {
           },
         })
       }
+    },
+    deleteLoan(id) {
+      this.$http.delete(`/loan/${id}`).then(() => {
+        const index = this.items.findIndex(loan => loan.id === id)
+        this.items.splice(index, 1)
+      })
+    },
+    editLoan(id) {
+      this.selectedId = id
+      this.update = true
+      const myLoan = this.items.find(loan => loan.id === id)
+      this.loan.purpose = myLoan.purpose
+      this.loan.amount = myLoan.amount
+      this.showModal()
+    },
+    updateRequest() {
+      this.$http.put(`/loan/${this.selectedId}`, {
+        amount: this.loan.amount,
+        purpose: this.loan.purpose,
+      }).then(() => {
+        const loanIndex = this.items.findIndex(loan => loan.id === this.selectedId)
+        this.items[loanIndex].purpose = this.loan.purpose
+        this.items[loanIndex].amount = this.loan.amount
+        this.toggleModal()
+      })
+    },
+    newLoan() {
+      this.update = false
+      this.loan.purpose = ''
+      this.loan.amount = 0
+      this.showModal()
     },
     toggleModal() {
       this.$refs['my-modal'].toggle('#toggle-btn')

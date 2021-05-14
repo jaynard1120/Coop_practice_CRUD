@@ -23,3 +23,7 @@ Route::post('/login', 'UserLogin@login');
 Route::get('/loans','UserLogin@getLoanHistory');
 
 Route::post('/loan','LoanController@loanMoney');
+
+Route::delete('/loan/{id}','LoanController@deleteLoan');
+
+Route::put('/loan/{id}','LoanController@updateLoan'); 
