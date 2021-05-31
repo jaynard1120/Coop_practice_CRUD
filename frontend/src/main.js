@@ -1,17 +1,20 @@
 import Vue from 'vue'
 import { ToastPlugin, ModalPlugin } from 'bootstrap-vue'
 import VueCompositionAPI from '@vue/composition-api'
-
+import axios from 'axios'
 import router from './router'
 import store from './store'
 import App from './App.vue'
 
-// Global Components
-import './global-components'
-
 // 3rd party plugins
 import '@/libs/portal-vue'
 import '@/libs/toastification'
+
+// Global Components
+import './global-components'
+
+// Global variable
+axios.defaults.baseURL = 'http://127.0.0.1:8000/api'
 
 // BSV Plugin Registration
 Vue.use(ToastPlugin)

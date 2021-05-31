@@ -28,7 +28,7 @@
       </b-thead>
       <b-tbody>
         <b-tr
-          v-for="data in items"
+          v-for="data in allItems"
           :key="data.id"
         >
           <b-td colspan="1">
@@ -45,7 +45,7 @@
               id="delete"
               v-ripple.400="'rgba(113, 102, 240, 0.15)'"
               variant="outline-danger"
-              @click="deleteLoan(data.id)"
+              @click="deleteRequest(data.id)"
             >
               Delete
             </b-button>
@@ -68,7 +68,7 @@
             variant="secondary"
             class="text-right"
           >
-            Total Rows: <b>{{ items.length }}</b>
+            Total Rows: <b>{{ allItems.length }}</b>
           </b-td>
         </b-tr>
       </b-tfoot>
@@ -160,7 +160,6 @@
           class="mt-2"
           variant="outline-danger"
           block
-          @click="toggleModal"
         >
           Cancel
         </b-button>
@@ -189,8 +188,9 @@ import {
   BTfoot,
 } from 'bootstrap-vue'
 import Ripple from 'vue-ripple-directive'
-import axios from 'axios'
+// import axios from 'axios'
 import ToastificationContent from '@core/components/toastification/ToastificationContent.vue'
+import { mapGetters, mapActions } from 'vuex'
 
 export default {
   components: {
@@ -228,19 +228,20 @@ export default {
         'purpose',
         'actions',
       ],
-      items: [
-
-      ],
     }
   },
-  mounted() {
-    axios
-      .get('http://127.0.0.1:8000/api/loans')
-      .then(res => {
-        this.items = res.data
-      })
+  computed: mapGetters(['allItems']),
+  created() {
+    this.fetchLoanRequest()
   },
   methods: {
+    ...mapActions(['fetchLoanRequest', 'addRequest', 'deleteRequest', 'editLoanRequest']),
+    newLoan() {
+      this.update = false
+      this.loan.purpose = ''
+      this.loan.amount = 0
+      this.showModal()
+    },
     toastErrorMessage(message) {
       this.$toast({
         component: ToastificationContent,
@@ -254,78 +255,64 @@ export default {
     showModal() {
       this.$refs['my-modal'].show()
     },
+    toggleModal() {
+      this.$refs['my-modal'].toggle('#toggle-btn')
+    },
     saveRequest() {
       if (this.loan.purpose && this.loan.amount > 0) {
-        this.$http.post('/loan', {
-          amount: this.loan.amount,
-          purpose: this.loan.purpose,
-        }).then(res => {
-          this.items = res.data
-          this.$toast({
-            component: ToastificationContent,
-            props: {
-              title: 'Successfull!',
-              icon: 'EditIcon',
-              variant: 'success',
-            },
-          })
-          this.toggleModal()
-          this.loan.purpose = ''
-          this.loan.amount = 0
-        }).catch(() => {
-          this.toastErrorMessage('There was an error in submitting your data!')
+        this.addRequest(this.loan)
+        this.$toast({
+          component: ToastificationContent,
+          props: {
+            title: 'Successfull!',
+            icon: 'EditIcon',
+            variant: 'success',
+          },
         })
+        this.toggleModal()
+        this.loan.purpose = ''
+        this.loan.amount = 0
       } else {
         this.toastErrorMessage('Make sure to fill in all the fields and should be greater than zero!')
       }
     },
     deleteLoan(id) {
-      this.$http.delete(`/loan/${id}`).then(() => {
-        const index = this.items.findIndex(loan => loan.id === id)
-        this.items.splice(index, 1)
+      this.deleteRequest(id)
+      this.$toast({
+        component: ToastificationContent,
+        props: {
+          title: 'Successfully deleted!',
+          icon: 'EditIcon',
+          variant: 'success',
+        },
       })
     },
     editLoan(id) {
       this.selectedId = id
       this.update = true
-      const myLoan = this.items.find(loan => loan.id === id)
+      const myLoan = this.allItems.find(loan => loan.id === id)
       this.loan.purpose = myLoan.purpose
       this.loan.amount = myLoan.amount
       this.showModal()
     },
     updateRequest() {
       if (this.loan.purpose && this.loan.amount > 0) {
-        this.$http.put(`/loan/${this.selectedId}`, {
-          amount: this.loan.amount,
-          purpose: this.loan.purpose,
-        }).then(() => {
-          const loanIndex = this.items.findIndex(loan => loan.id === this.selectedId)
-          this.items[loanIndex].purpose = this.loan.purpose
-          this.items[loanIndex].amount = this.loan.amount
-          this.toggleModal()
-          this.$toast({
-            component: ToastificationContent,
-            props: {
-              title: 'Successfull!',
-              icon: 'EditIcon',
-              variant: 'success',
-            },
-          })
-        })
+        this.loan.id = this.selectedId
+        this.editLoanRequest(this.loan)
+        this.toggleModal()
       } else {
         this.toastErrorMessage('Make sure to fill in all the fields and should be greater than zero!')
       }
     },
-    newLoan() {
-      this.update = false
-      this.loan.purpose = ''
-      this.loan.amount = 0
-      this.showModal()
-    },
-    toggleModal() {
-      this.$refs['my-modal'].toggle('#toggle-btn')
-    },
   },
+  // methods: {
+  //   deleteLoan(id) {
+  //     this.$http.delete(`/loan/${id}`).then(() => {
+  //       const index = this.items.findIndex(loan => loan.id === id)
+  //       this.items.splice(index, 1)
+  //     })
+  //   },
+  // },
 }
 
 </script>

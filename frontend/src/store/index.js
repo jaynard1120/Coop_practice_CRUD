@@ -1,5 +1,6 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
+import loans from './modules/index'
 
 // Modules
 import app from './app'
@@ -13,6 +14,7 @@ export default new Vuex.Store({
     app,
     appConfig,
     verticalMenu,
+    loans,
   },
   strict: process.env.DEV,
 })
